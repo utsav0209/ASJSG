@@ -4,7 +4,6 @@
   <canvas id = "canvas" width = "800" height = "600">
   </canvas>
   <script>
-
     var canvas;
     var ctx;
     var ballX;
@@ -21,10 +20,10 @@
     var ballAccX = 0;
     var ballAccY = 0;
     var gameOn = 0;
-    var fps = 30;
-	
-    function calculateMousePos(evt) {
+    var fps = 20;
+    var score = 0;
 
+    function calculateMousePos(evt) {
       var rect = canvas.getBoundingClientRect();
       var root = document.documentElement;
       var mouseX = evt.clientX - rect.left - root.scrollLeft;
@@ -40,7 +39,7 @@
 
       canvas = document.getElementById("canvas");
       ctx = canvas.getContext("2d");
-
+      ctx.font = "30px Arial";
       groundX = 0;
       groundY = canvas.height - 50; 
       groundHeight = 30;
@@ -48,67 +47,88 @@
       ballX = canvas.width/2;
       ballRadius = 50;
       ballY = groundY - ballRadius;
-
+      
       drawRect(0,0,canvas.width,canvas.height,'black');
-
       canvas.addEventListener("click", function(evt){
           var mouse = calculateMousePos(evt);
           addAccelaration(mouse.x , mouse.y);
              gameOn = 1;})
-
-      setInterval(function() {
-                move();
-                draw();
-      }, 1000/fps);
-
+       
+        setInterval(function() {
+                  move();
+                  draw();
+        }, 1000/fps);  
     }
     //draws the things, use variables only so that 
     function draw() {
       drawRect(0,0,canvas.width,canvas.height,'black');
       drawRect(groundX,groundY,groundWidth,groundHeight,'white');
-      drawBall(ballX, ballY, ballRadius, 'white');
-      
+      drawBall(ballX, ballY, ballRadius, 'white');  
+      drawScore(canvas.width-50,50);
     }
 
     function move() {
-      if(ballY + ballRadius >= groundY){
-        gravity = 0;
-      }else{
-        gravity = defaultGravity;
-      }      
-      ballVelocityY += gravity;
-      //Horizontal Air Resistance
-      if(ballVelocityX < 0 ) 
-        ballVelocityX += (-0.01)*ballVelocityX;
-      if(ballVelocityX > 0 )    
-        ballVelocityX -= (0.01)*ballVelocityX;      
-      //Vertical Air Resistance
-      if(ballVelocityY < 0 ) 
-        ballVelocityY += (-0.01)*ballVelocityY;
-      if(ballVelocityY > 0 )    
-        ballVelocityY -= (0.01)*ballVelocityY;      
-      
-
-      
-      if(ballVelocityX>0 || ballVelocityX<0){
-	  	if(ballX + ballVelocityX + ballRadius >= canvas.width || ballX + ballVelocityX - ballRadius <= 0 ){
-	  		ballVelocityX = -ballVelocityX;                
-                }
-      }
-     
-      
-      
-      ballY += ballVelocityY;
-      ballX += ballVelocityX;
-
       if(gameOn == 1){
+        if(ballY + ballRadius >= groundY){
+          gravity = 0;
+        }else{
+          gravity = defaultGravity;
+        }      
+        ballVelocityY += gravity;
+        //Horizontal Air Resistance
+        if(ballVelocityX < 1 ) 
+          ballVelocityX += (-0.01)*ballVelocityX;
+        if(ballVelocityX > 1 )    
+          ballVelocityX -= (0.01)*ballVelocityX;      
+        //Vertical Air Resistance
+        if(ballVelocityY < 1 ) 
+          ballVelocityY += (-0.01)*ballVelocityY;
+        if(ballVelocityY > 1 )    
+          ballVelocityY -= (0.01)*ballVelocityY;    
+        //Boundry condition  
+        if(ballVelocityX>0 || ballVelocityX<0){
+          if(ballX + ballVelocityX + ballRadius >= canvas.width || ballX + ballVelocityX - ballRadius <= 0 ){
+            ballVelocityX = -ballVelocityX;                
+          }
+        }
+        
+        ballY += ballVelocityY;
+        ballX += ballVelocityX;
+        
+        
         if(ballY >= groundY - ballRadius){
-          ballVelocityY = -ballVelocityY;
+          gameOn = 0;
+          ballY = groundY - ballRadius;
+          drawGameOver();
         }
       }
 
     }
     
+    function drawGameOver(){
+        drawRect(0,0,canvas.width,canvas.height,'black');
+        drawText(canvas.width/2,canvas.height/2-50);
+        drawScore(canvas.width/2,canvas.height/2);
+        setInterval(function() {
+                  drawGameOver();
+        }, 1);  
+    }
+    
+
+    function drawText(X,Y){
+      ctx.font = "30px Comic Sans MS";
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.fillText("Game Over\n", X, Y);
+    }
+
+    function drawScore(X,Y){
+      ctx.font = "30px Comic Sans MS";
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.fillText(score, X, Y);
+    }
+
     function drawBall(X, Y, radius, color) {
 	    ctx.fillStyle = color;
 	    ctx.beginPath();
@@ -127,9 +147,9 @@
       if(coorX > (ballX - ballRadius) && coorX < ballX + (ballRadius) 
         && coorY > (ballY - ballRadius) && coorY < (ballY + ballRadius)){
 
-        ballVelocityX += (ballX - coorX)/20;
-        ballVelocityY += (ballY - coorY)/10; 
-
+        ballVelocityX += (ballX - coorX)/4;
+        ballVelocityY += (ballY - coorY)/2; 
+        score++;
       }
     }
     
